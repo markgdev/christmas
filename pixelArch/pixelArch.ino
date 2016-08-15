@@ -13,7 +13,7 @@
 //   NEO_GRB     Pixels are wired for GRB bitstream (most NeoPixel products)
 //   NEO_RGB     Pixels are wired for RGB bitstream (v1 FLORA pixels, not v2)
 //   NEO_RGBW    Pixels are wired for RGBW bitstream (NeoPixel RGBW products)
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(60*3, PIN, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(30*3, PIN, NEO_GRB + NEO_KHZ800);
 
 // IMPORTANT: To reduce NeoPixel burnout risk, add 1000 uF capacitor across
 // pixel power leads, add 300 - 500 Ohm resistor on first pixel's data input
@@ -38,13 +38,37 @@ void loop() {
   // Some example procedures showing how to display to the pixels:
 //  colorWipe(strip.Color(255, 0, 0), 10); // Red
 
-    singleChaseUp(strip.Color(0, 255, 0), 2);
-    singleChaseDown(strip.Color(255, 0, 0), 2);
-    singleChaseUp(strip.Color(0, 0, 255), 2);
+
+    // Green
+    splitBuildUp(strip.Color(0, 255, 0), 4);
+    splitBuildDown(strip.Color(100,100,100), 4);
+    // Blue
+    splitBuildUp(strip.Color(0, 0, 255), 4);
+    splitBuildDown(strip.Color(100,100,100), 4);
+    // Red
+    splitBuildUp(strip.Color(255, 0, 0), 4);
+    splitBuildDown(strip.Color(100,100,100), 4);
     
-    splitChase(strip.Color(0, 255, 0), 2);
-    splitChase(strip.Color(255, 0, 0), 2);
-    splitChase(strip.Color(0, 0, 255), 2);
+    flash(strip.Color(0, 255, 0), 500, 5);
+    flash(strip.Color(0, 0, 255), 500, 5);
+    flash(strip.Color(255, 0, 0), 500, 5);
+    
+    singleBuildUp(strip.Color(0, 255, 0), 4);
+    singleBuildDown(strip.Color(0, 255, 0), 4);
+
+    singleBuildUp(strip.Color(0, 0, 255), 4);
+    singleBuildDown(strip.Color(0, 0, 255), 4);
+
+    singleBuildUp(strip.Color(255, 0, 0), 4);
+    singleBuildDown(strip.Color(255, 0, 0), 4);
+
+    singleChaseUp(strip.Color(0, 255, 0), 4);
+    singleChaseDown(strip.Color(255, 0, 0), 4);
+    singleChaseUp(strip.Color(0, 0, 255), 4);
+    
+    splitChase(strip.Color(0, 255, 0), 4);
+    splitChase(strip.Color(255, 0, 0), 4);
+    splitChase(strip.Color(0, 0, 255), 4);
     
 //  
 //  colorWipe(strip.Color(0, 255, 0), 50); // Green
@@ -55,9 +79,29 @@ void loop() {
 //  theaterChase(strip.Color(127, 0, 0), 50); // Red
 //  theaterChase(strip.Color(0, 0, 127), 50); // Blue
 //
-  rainbow(20);
-  rainbowCycle(20);
-  theaterChaseRainbow(50);
+//  rainbow(20);
+//  rainbowCycle(20);
+//  theaterChaseRainbow(50);
+}
+
+void flash(uint32_t c, uint8_t wait, uint8_t repeat){
+  for(uint8_t count=0; count<repeat; count++){
+    for(uint16_t i=0; i<strip.numPixels(); i++) {
+      strip.setPixelColor(i, 0,0,0);
+    }
+    strip.show();
+    delay(wait/2);
+    for(uint16_t i=0; i<strip.numPixels(); i++) {
+      strip.setPixelColor(i, c);
+    }
+    strip.show();
+    delay(wait);
+    for(uint16_t i=0; i<strip.numPixels(); i++) {
+      strip.setPixelColor(i, 0,0,0);
+    }
+    strip.show();
+    delay(wait/2);
+  }
 }
 
 void splitChase(uint32_t c, uint8_t wait){
@@ -65,7 +109,7 @@ void splitChase(uint32_t c, uint8_t wait){
   for(uint16_t posMin = 0; posMin<strip.numPixels(); posMin++){
     
     for(uint16_t i=0; i<strip.numPixels(); i++) {
-      if((posMin+5 > i &&  posMin-5 < i) || (posMax+5 > i &&  posMax-5 < i))
+      if((posMin+2 > i &&  posMin-2 < i) || (posMax+2 > i &&  posMax-2 < i))
       {
         strip.setPixelColor(i, c);
       }
@@ -79,10 +123,54 @@ void splitChase(uint32_t c, uint8_t wait){
   } 
 }
 
+void splitBuildUp(uint32_t c, uint8_t wait){
+  uint16_t posMax = strip.numPixels();
+  for(uint16_t posMin = 0; posMin<strip.numPixels(); posMin++){
+    
+    for(uint16_t i=0; i<strip.numPixels(); i++) {
+      if((posMin > i) || (posMax < i))
+      {
+        strip.setPixelColor(i, c);
+      }
+      else{
+        strip.setPixelColor(i, 0, 0, 0);
+      }
+    }
+    posMax--;
+    strip.show();
+    delay(wait);
+  } 
+}
+
+void splitBuildDown(uint32_t c, uint8_t wait){
+  uint16_t posMax = strip.numPixels()/2;
+  for(uint16_t posMin = strip.numPixels()/2; posMin>0; posMin--){
+    
+    for(uint16_t i=0; i<strip.numPixels()/2; i++) {
+      if((posMin < i))// || (posMax > i))
+      {
+        strip.setPixelColor(i, c);
+      }
+//      else{
+//        strip.setPixelColor(i, 0, 0, 0);
+//      }
+    }
+    for(uint16_t i=strip.numPixels()/2; i<strip.numPixels(); i++) {
+      if((posMax > i))
+      {
+        strip.setPixelColor(i, c);
+      }
+    }
+    posMax++;
+    strip.show();
+    delay(wait);
+  } 
+}
+
 void singleChaseUp(uint32_t c, uint8_t wait){
   for(uint16_t posi = 0; posi<strip.numPixels(); posi++){
     for(uint16_t i=0; i<strip.numPixels(); i++) {
-      if(posi+5 > i &&  posi-5 < i)
+      if(posi+2 > i &&  posi-2 < i)
       {
         strip.setPixelColor(i, c);
       }
@@ -98,13 +186,46 @@ void singleChaseUp(uint32_t c, uint8_t wait){
 void singleChaseDown(uint32_t c, uint8_t wait){ 
   for(uint16_t posi = strip.numPixels(); posi>0; posi--){
     for(uint16_t i=strip.numPixels(); i>0; i--) {
-      if(posi+5 > i &&  posi-5 < i)
+      if(posi+2 > i &&  posi-2 < i)
       {
         strip.setPixelColor(i, c);
       }
       else{
         strip.setPixelColor(i, 0, 0, 0);
       }
+    }
+    strip.show();
+    delay(wait);
+  } 
+}
+
+
+void singleBuildUp(uint32_t c, uint8_t wait){
+  for(uint16_t posi = 0; posi<strip.numPixels(); posi++){
+    for(uint16_t i=0; i<strip.numPixels(); i++) {
+      if(posi > i)
+      {
+        strip.setPixelColor(i, c);
+      }
+      else{
+        strip.setPixelColor(i, 0, 0, 0);
+      }
+    }
+    strip.show();
+    delay(wait);
+  }
+}
+
+void singleBuildDown(uint32_t c, uint8_t wait){ 
+  for(uint16_t posi = strip.numPixels(); posi>0; posi--){
+    for(uint16_t i=strip.numPixels(); i>0; i--) {
+      if(posi < i)
+      {
+        strip.setPixelColor(i, 0,0,0);
+      }
+//      else{
+//        strip.setPixelColor(i, 0, 0, 0);
+//      }
     }
     strip.show();
     delay(wait);
